@@ -8,16 +8,17 @@ void inputForFileMode(const char* cmd)
     // 为清空文件特制
     if (strcmp(cmd, "clear") == 0)
     {
-        FILE *output_file = fopen("../BashOutput.txt", "w");
+        FILE *output_file = fopen("./BashOutput.txt", "w");
         fclose(output_file);
     }
     else
     {
         char output_buffer[131072];
+        memset(output_buffer, 0, sizeof(output_buffer));
         FILE *cmd_result = popen(cmd, "r");
         fread(output_buffer, sizeof(char), sizeof(output_buffer), cmd_result);
-        FILE *output_file = fopen("../BashOutput.txt", "a");
-        system("date >> ../BashOutput.txt");
+        FILE *output_file = fopen("./BashOutput.txt", "a");
+        system("date >> ./BashOutput.txt");
         fputs(output_buffer, output_file);
         fprintf(output_file, "\n");
         pclose(cmd_result);
@@ -29,6 +30,7 @@ char* inputForShellMode(const char *cmd)
 {
     int buffer_size = 131072;   // 缓冲区大小128KB
     char* output_buffer = (char*)malloc(sizeof(char) * buffer_size);
+    memset(output_buffer, 0, buffer_size);
     FILE* cmd_result = popen(cmd, "r");
     fread(output_buffer, sizeof(char), buffer_size, cmd_result);
     pclose(cmd_result);
