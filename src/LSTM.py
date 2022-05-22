@@ -111,3 +111,20 @@ class LSTM_Model:
             raise RuntimeError('请先调用"fit"方法来训练模型！')
         signal_result = self._model.predict(x)
         return signal_result
+
+    def save(self, loc: str) -> None:
+        ''' 将模型保存到指定的路径
+        
+        params: loc: 模型保存的路径
+        '''
+        if not self._hasTrained:
+            raise RuntimeError('请先调用"fit"方法来训练模型！')
+        self._model.save(loc)
+
+    def load(self, loc: str) -> None:
+        ''' 从指定路径读入并加载模型
+        
+        params: loc: 加载模型的路径
+        '''
+        from tf.keras.models import load_model
+        self._model = load_model(loc)
