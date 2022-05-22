@@ -14,9 +14,11 @@ lib = CDLL('../lib/Bash.so.0')
 def bash(cmd: str) -> str:
     ''' 在python环境中提供terminal接口，接收用户给定的系统命令并返回输出结果
     
-    params: cmd: 进行系统调用的指令
+    Args:
+        cmd: 进行系统调用的指令
     
-    return: 系统返回的结果
+    Returns:
+        系统返回的结果
     '''
     # 设置句柄
     bash_in_c = lib.inputForShellMode
@@ -37,7 +39,8 @@ def bashToFile(cmd: str) -> None:
     ''' 在python环境中提供terminal接口，接收用户给定的系统命令并将返回的输出结果存放在调用程序统一目录下的 "BashOutput.txt" 中
         该函数能详细地给出调用错误
     
-    params: cmd: 进行系统调用的指令
+    Args:
+        cmd: 进行系统调用的指令
     '''
     # 设置句柄
     bash_in_c = lib.inputForFileMode

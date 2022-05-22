@@ -23,9 +23,11 @@ class DataProcessor:
     def _mergeData(self, *single_dataset) -> list:
         ''' 输入要合并的单个的数据集，该方法把每个单独的数据集各自对应的项归并成一个元组，然后加入新的数据集中
     
-        params: 单独的数据集
+        Arg:
+            单独的数据集
 
-        return: 归并后的数据集
+        Returns:
+            归并后的数据集
         '''
         merged_data = []
         for ele in zip(*single_dataset):
@@ -38,10 +40,11 @@ class DataProcessor:
     def __init__(self, stock_code: str, start_date: str, end_date: str, interval: int):
         ''' 需要用户制定获取数据的起止日期以及面向的股票
         
-        params: stock: 股票代码
-                start_date: 起始日期，格式为“年-月-日”，如"2022-05-16"
-                end_date: 截止日期，格式为“年-月-日”，如"2022-05-16"
-                interval: 指定后续绝大多数操作的时间窗口
+        Arg:
+            stock: 股票代码
+            start_date: 起始日期，格式为“年-月-日”，如"2022-05-16"
+            end_date: 截止日期，格式为“年-月-日”，如"2022-05-16"
+            interval: 指定后续绝大多数操作的时间窗口
         '''
         # 检验日期格式是否合法
         import re
@@ -62,7 +65,8 @@ class DataProcessor:
     def getTrainData(self) -> list:
         ''' 获取 LSTM 网络所需的训练数据集，但在真实使用前还需要根据输入规模进行reshape工作
         
-        return: LSTM_Model类的fit方法用到的训练集
+        Returns:
+            LSTM_Model类的fit方法用到的训练集
         '''
         CPD_info = (
             CPD().getCPDScoreAndLocation(self.__stock_code, self.__start_date, self.__end_date, self.__interval))
@@ -78,7 +82,8 @@ class DataProcessor:
     def getTargetData(self) -> list:
         ''' 获取 LSTM 网络所需的目标数据集
         
-        return: LSTM_Model类的fit方法用到的目标集
+        Returns:
+            LSTM_Model类的fit方法用到的目标集
         '''
         # 拟合所需单独的目标数据集
         volatilities = self.__base.getVolRange(60, 0.94)

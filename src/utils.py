@@ -10,7 +10,9 @@ from mindgo_api import *
 
 
 class utils:
-    ''' 一些基础组件，对mindgo提供的部分股票api进行了封装，根据需求简化了一些常用数据请求方法的接口，实现了一些简单的数据变换函数
+    ''' 一些基础组件
+    
+    对mindgo提供的部分股票api进行了封装，根据需求简化了一些常用数据请求方法的接口，实现了一些简单的数据变换函数
     
     Attributes:
           stock: utils类中绝大多数的方法面向的股票，形式为特定股票的代码
@@ -25,11 +27,13 @@ class utils:
         ''' 获取给定股票在给定日期区间上的收盘价
             API灵活，不受类的初始化参数限制
         
-        params: stock: 股票代码
-                start_date: 起始日期
-                end_date: 截止日期
+        Args:
+            stock: 股票代码
+            start_date: 起始日期
+            end_date: 截止日期
                 
-        return: 给定股票在给定日期区间上的收盘价的序列
+        return:
+            给定股票在给定日期区间上的收盘价的序列
         '''
         # 需要校验给定日期是否为交易日
         price_df = get_price([stock_code],
@@ -47,11 +51,13 @@ class utils:
         ''' 给定特定的股票以及考察时间段，获得该时间段内当期交易日所得回报率r_t滞后一天的回报率r_t+1
             API灵活，不受类的初始化参数限制
         
-        params: stock: 请求的回报率对应的股票
-                start_date: 当期起始时间点
-                end_date: 当期结束时间点
+        Args: 
+            stock: 请求的回报率对应的股票
+            start_date: 当期起始时间点
+            end_date: 当期结束时间点
         
-        return: 给定股票在当期滞后一天的回报率序列
+        Returns: 
+            给定股票在当期滞后一天的回报率序列
         '''
         # 开始日期根据date真实能够请求到的交易数据的当日来计算最近滞后的交易日，本质上是先校准date，再相应校准date+1
         start_date = self.getNearestTradeDayLagged(start_date)
@@ -69,9 +75,10 @@ class utils:
     def __init__(self, stock_code: str, start_date: pd.Timestamp, end_date: pd.Timestamp):
         ''' 初始化 utils 类，需要提供股票代码，考察的起始日期以及终止日期，后续相关操作将针对用户给定的股票并建立在提供的时间区间上
         
-        params: stock: 股票代码
-                start_date: 起始日期
-                end_date: 截止日期
+        Args: 
+            stock: 股票代码
+            start_date: 起始日期
+            end_date: 截止日期
         '''
         # 输入数据类型校验
         if (not isinstance(stock_code, str) or
@@ -91,16 +98,19 @@ class utils:
     def getPrice(self) -> pd.Series:
         ''' 给定股票代码，起始日期与截止日期，返回起始日期到截止日期之间的交易日中该股票的收盘价
 
-        return: price: 指定日期期间交易日该股票的每日收盘价
+        Returns: 
+            price: 指定日期期间交易日该股票的每日收盘价
         '''
         return self._getPrice(self.stock_code, self.start_date, self.end_date)
 
     def getClosePriceByDate(self, date: pd.Timestamp) -> float:
         ''' 对 get_price API 的一层包装，获取某支股票指定日期的数据，若指定日期无数据，则顺延一天
         
-        params: date: 需要请求当日收盘价的日期
+        Args: 
+            date: 需要请求当日收盘价的日期
         
-        return: close_price: 指定股票在指定日期的收盘价
+        Returns: 
+            close_price: 指定股票在指定日期的收盘价
         '''
         try:
             close_price_df = get_price([self.stock_code],
@@ -115,7 +125,8 @@ class utils:
     def getMACD(self) -> pd.Series:
         ''' 给定股票代码，起始日期与截止日期，返回起始日期到截止日期之间的交易日中该股票的MACD因子值
         
-        return: macd: 指定股票在指定日期的MACD因子值
+        Returns: 
+            macd: 指定股票在指定日期的MACD因子值
         '''
         trade_days = get_trade_days(self.start_date, self.end_date)
         # 请求数据
@@ -134,9 +145,11 @@ class utils:
     def isTradeDay(self, date: pd.Timestamp) -> bool:
         ''' 判断给定日期是否为交易日
         
-        params: date: 需被判断是否为交易日的日期
+        Args: 
+            date: 需被判断是否为交易日的日期
         
-        return: 为真，若date是交易日
+        Returns: 
+            为真，若date是交易日
         '''
         return len(get_trade_days(start_date=date, end_date=date)) == 1
     
@@ -147,9 +160,11 @@ class utils:
             若t为非交易日，t+1日为交易日，此时t请求的是恰好是时刻t+1的收盘价，则该函数在t+1日的基础上求顺延一日的收盘价
             若t为非交易日，t+1日也为非交易日，此时t请求的是t后最近一期交易日的收盘价，则该函数返回最近一期基础上顺延得到的收盘价
         
-        params: date: 给定的日期t
+        Args: 
+            date: 给定的日期t
         
-        return: 最近滞后一期的交易日的收盘价
+        Returns: 
+            最近滞后一期的交易日的收盘价
         '''
         # 如果基期是交易日
         if self.isTradeDay(date):
@@ -167,18 +182,21 @@ class utils:
     def getOneDayLaggedReturns(self) -> pd.Series:
         ''' 根据类的初始化参数，求给定股票在给定时间段上整体滞后一天的回报率序列
         
-        return: 定股票在给定时间段上整体滞后一天的回报率序列
+        Returns: 
+            定股票在给定时间段上整体滞后一天的回报率序列
         '''
         return self._getOneDayLaggedReturns(self.stock_code, self.start_date, self.end_date)
         
     def getVolatility(self, date: pd.Timestamp, interval: int, alpha: float) -> float:
         ''' 计算给定股票的在给定日期波动率，计算方法为EWMA
         
-        params: date: 给定的日期
-                interval: EWMA方法回望的时间期限
-                alpha: EWMA中计算波动率的配权
+        Args: 
+            date: 给定的日期
+            interval: EWMA方法回望的时间期限
+            alpha: EWMA中计算波动率的配权
                 
-        return: 给定股票的在给定日期按EWMA方法计算得到的波动率
+        Returns: 
+            给定股票的在给定日期按EWMA方法计算得到的波动率
         '''
         from numpy import log, square, mean, sqrt
         # 查询距离基期最近的交易日，向前搜索
@@ -204,10 +222,12 @@ class utils:
     def getVolRange(self, interval: int, alpha: float) -> pd.Series:
         ''' 获得给定股票在给定日期区间上的波动率，根据EWMA方法计算得到
         
-        params: interval: EWMA方法回望的时间期限
-                alpha: EWMA中计算波动率的配权
+        Args: 
+            interval: EWMA方法回望的时间期限
+            alpha: EWMA中计算波动率的配权
         
-        return: 给定股票在给定日期区间的波动率
+        Returns: 
+            给定股票在给定日期区间的波动率
         '''
         date = self.start_date
         vols = []
@@ -222,9 +242,11 @@ class utils:
     def standardize(self, vector: pd.Series) -> pd.Series:
         ''' 对给定的向量进行标准化
         
-        params: vector: 需要被标准化的向量, 一维
+        Args: 
+            vector: 需要被标准化的向量, 一维
         
-        return: 标准化变换后的向量
+        Returns: 
+            标准化变换后的向量
         '''
         # 判断类型并转换
         if not type(vector) is pd.Series:
@@ -242,17 +264,19 @@ class utils:
     def getNormalizedReturns(self, interval: int) -> pd.Series:
         ''' 对 uitls 初始化时给定的股票以及时间段上的回报率序列进行按照 interval 设置的回望期进行正规化
         
-        params: returns: 原始的回报率序列，要求 Series的index属性返回的序列中元素类型为 pd.Timestamp
+        Args: 
+            interval: 向前回望的期限
         
-        return: 正规化后的回报率序列
+        Returns: 
+            正规化后的回报率序列
         '''
         # 初始化
         from numpy import sqrt
-        returns = self.getPrice()
+        rets = self.getPrice()
         normalized_returns = []
         # 逐一正规化
-        for date in returns.index:
-            current_price = returns[date]
+        for date in rets.index:
+            current_price = rets[date]
             look_back_date = date - timedelta(interval)
             # 校准交易日
             while not self.isTradeDay(look_back_date):

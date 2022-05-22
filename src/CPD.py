@@ -24,17 +24,21 @@ class CPD:
     def _sigmoidModel(self, location: float, steepness: float) -> callable:
         ''' 带参数的 sigmoid 函数，将其分离为两部分，一部分用来接收超参数，另一部分用来接收自变量
         
-        params: location: 参数
-                steepness: 参数
+        Args:
+            location: 参数
+            steepness: 参数
         
-        return: 一个仅接受自变量x，并返回因变量值的 sigmoid 函数
+        Returns:
+            一个仅接受自变量x，并返回因变量值的 sigmoid 函数
         '''
         def sigmoid(x: float) -> float:
             ''' 仅接受自变量x的sigmoid函数
             
-            params: x: 自变量
+            Args:
+                x: 自变量
             
-            return: sigmoid值
+            Returns:
+                sigmoid值
             '''
             from numpy import exp
             return 1 / (1 + exp(-steepness * (x - location)))
@@ -43,18 +47,22 @@ class CPD:
     def _MaternKernelModel(self, λ: float, σ_h: float) -> callable:
         ''' 带参数的 Matern 3/2 核函数，将其分离为两部分，一部分用来接收超参数，另一部分用来接收自变量
         
-        params: λ: 超参数
-                σ_h: 超参数
+        Args:
+            λ: 超参数
+            σ_h: 超参数
         
-        return: 一个仅接收自变量(x, x')，并返回因变量值的 kernel 函数
+        Returns:
+            一个仅接收自变量(x, x')，并返回因变量值的 kernel 函数
         '''
         def kernel(x1: float, x2: float) -> float:
             ''' 接受两个自变量，返回根据kernel的表达式计算得到的因变量值
             
-            params: x1: 自变量1
-                    x2: 自变量2
+            Args:
+                x1: 自变量1
+                x2: 自变量2
             
-            return: 根据表达式得出的值
+            Returns:
+                根据表达式得出的值
             '''
             from numpy import sqrt, square, exp
             tmp = sqrt(3) * abs(x1 - x2) / λ
@@ -64,19 +72,23 @@ class CPD:
     def _CPKernelModel(self, kernel1: callable, kernel2: callable, sigmoid: callable) -> callable:
         ''' 带参数的 Change Point 核函数，将其分离为两部分，一部分用来接收超参数，另一部分用来接收自变量
         
-        params: kernel1: 一个带超参数集合的核函数 
-                kernel2: 另一个带超参数集合的核函数 
-                sigmoid: 一个带超参数的sigmoid函数
+        Args:
+            kernel1: 一个带超参数集合的核函数 
+            kernel2: 另一个带超参数集合的核函数 
+            sigmoid: 一个带超参数的sigmoid函数
                 
-        return: 一个仅接收自变量(x, x')，并返回因变量值的 kernel 函数
+        Returns:
+            一个仅接收自变量(x, x')，并返回因变量值的 kernel 函数
         '''
         def kernel(x1: float, x2: float) -> float:
             ''' 接受两个自变量，返回根据kernel的表达式计算得到的因变量值
             
-            params: x1: 自变量1
-                    x2: 自变量2
+            Args:
+                x1: 自变量1
+                x2: 自变量2
             
-            return: 根据表达式得出的值
+            Returns:
+                根据表达式得出的值
             '''
             return kernel1(x1, x2) * sigmoid(x1) * sigmoid(x2) + kernel2(x1, x2) * (1 - sigmoid(x1)) * (1 - sigmoid(x2))
         return kernel
@@ -84,13 +96,15 @@ class CPD:
     def _calcLikelihood(self, std_r: pd.Series, loc: np.array, interval: int, kernel: callable, σ_n: float) -> float:
         ''' 给定相关变量，计算 Matern kernel 参数 ξ 的似然估计
         
-        params: std_r: 标准化后的回报率序列
-                loc: 时间窗口的位置点(横坐标)
-                interval: 时间窗口的长度
-                kernel: 进行参数估计的 Matern kernel
-                σ_n: 随机绕动项服从的零均值正太分布的标准差
+        Args:
+            std_r: 标准化后的回报率序列
+            loc: 时间窗口的位置点(横坐标)
+            interval: 时间窗口的长度
+            kernel: 进行参数估计的 Matern kernel
+            σ_n: 随机绕动项服从的零均值正太分布的标准差
         
-        return: 给定参数和自变量下，Matern kernel 参数ξ的似然函数的值
+        Returns:
+            给定参数和自变量下，Matern kernel 参数ξ的似然函数的值
         '''
         from numpy.linalg import inv, det
         from numpy import log, square, pi
@@ -122,20 +136,24 @@ class CPD:
     def _likelihoodModel(self, std_r: pd.Series, loc: np.array, interval: int, mode: str) -> callable:
         ''' 给定自变量并指定kernel的种类后，返回一个单独将参数ξ作为接口的似然函数
         
-        params: std_r: 标准化后的回报率序列
-                loc: 时间窗口的位置点(横坐标)
-                interval: 时间窗口的长度
-                mode: kernel的种类，当前仅支持 "Matern"/"CP" 两种
+        Args:
+            std_r: 标准化后的回报率序列
+            loc: 时间窗口的位置点(横坐标)
+            interval: 时间窗口的长度
+            mode: kernel的种类，当前仅支持 "Matern"/"CP" 两种
         
-        return: 一个单独将参数ξ作为接口的极大似然函数
+        Returns:
+            一个单独将参数ξ作为接口的极大似然函数
         '''
         # mode值为 Matern，则返回具有 Matern kernel 参数接口的似然函数
         def MaternLikelihood(ξ: list) -> float:
             ''' 接收 Matern kernel 的参数ξ，并返回相应的似然函数值
             
-            params: ξ: Matern kernel内含的参数，包括 λ，σ_h，σ_n
+            Args:
+                ξ: Matern kernel内含的参数，包括 λ，σ_h，σ_n
             
-            return: 给定参数 ξ 后计算得到的似然函数值
+            Returns:
+                给定参数 ξ 后计算得到的似然函数值
             '''
             # 检验参数个数是否达标
             if (len(ξ)) != 3:
@@ -149,9 +167,11 @@ class CPD:
         def CPLikelihood(ξ: list) -> float:
             ''' 接收 Change Point kernel 的参数ξ，并返回相应的似然函数值
             
-            params: ξ: Matern kernel内含的参数，包括 λ1，σ_h1，λ2，σ_h2，σ_n，location，steepness
+            Args:
+                ξ: Matern kernel内含的参数，包括 λ1，σ_h1，λ2，σ_h2，σ_n，location，steepness
             
-            return: 给定参数 ξ 后计算得到的似然函数值
+            Returns:
+                给定参数 ξ 后计算得到的似然函数值
             '''
             # 检验参数个数是否达标
             if (len(ξ)) != 7:
@@ -176,11 +196,13 @@ class CPD:
     def _getMaximumLikelihood(self, likelihood_func: callable, init_value: list, params_bounds: tuple) -> dict:
         ''' 给定一个接收参数的似然函数，以及参数的初值，返回参数的极大似然估计以及此时的似然函数值
         
-        params: likelihood_func: 需要优化的似然函数
-                init_value: 优化的初始值，需要和似然函数接收的参数个数匹配
-                params_bounds: 参数求解时迭代的上下界
+        Args:
+            likelihood_func: 需要优化的似然函数
+            init_value: 优化的初始值，需要和似然函数接收的参数个数匹配
+            params_bounds: 参数求解时迭代的上下界
         
-        return: 参数的极大似然估计以及似然函数值(如果可以求解得到)
+        Returns:
+            参数的极大似然估计以及似然函数值(如果可以求解得到)
         '''
         from scipy.optimize import minimize
         methods = ['L-BFGS-B', 'Powell', 'Nelder-Mead']
@@ -205,10 +227,12 @@ class CPD:
     def _divideIntoSegments(self, std_returns: pd.Series, interval: int) -> tuple:
         ''' 接受输入的时序的标准化回报率序列，以及窗口长度interval，返回划分好的标准化价格段以及位置段
         
-        params: std_returns: 标准化的回报率序列
-                interval: 时间窗口的长度
+        Args:
+            std_returns: 标准化的回报率序列
+            interval: 时间窗口的长度
         
-        return:划分好的标准化价格段以及位置段元组，具体形式为：(标准化价格段, 位置段)
+        return:
+            划分好的标准化价格段以及位置段元组，具体形式为：(标准化价格段, 位置段)
         '''
         # 查看回报率序列是否为空
         if std_returns.size == 0:
@@ -238,10 +262,12 @@ class CPD:
             注：CPD score 特征是针对“一个窗口”的，在固定的窗口期上每天都相等
                CPD location 是针对每一天的，在固定的窗口期上每天各不相等
         
-        params: std_returns: 一个时间窗口上的回报率序列
-                locations: 一个时间窗口上的位置序列
+        Args:
+            std_returns: 一个时间窗口上的回报率序列
+            locations: 一个时间窗口上的位置序列
         
-        return: 一个时间窗口上的CPD score 和 location
+        Returns:
+            一个时间窗口上的CPD score 和 location
         '''
         from numpy import exp
         # 校验时间窗口期是否唯一
@@ -286,12 +312,14 @@ class CPD:
             注：一个时间窗口内的拐点强弱信号处处相等，衡量的是『该窗口内』是否有出现“值得警惕和注意”的拐点；
                而当前点距离窗口内拐点的距离是互异的，这个特征是想对于点来说的
         
-        params: stock_code: 需要考察的股票代码
-                start_date: 考察的起始日期
-                end_date: 考察的结束日期
-                interval: 时间窗口的跨度
+        Args:
+            stock_code: 需要考察的股票代码
+            start_date: 考察的起始日期
+            end_date: 考察的结束日期
+            interval: 时间窗口的跨度
         
-        return: 该股票的时序数据，每一日在对应时间窗口内具有的拐点强弱信号以及当日距所属时间窗口内拐点的距离
+        Returns:
+            该股票的时序数据，每一日在对应时间窗口内具有的拐点强弱信号以及当日距所属时间窗口内拐点的距离
         '''
         # interval 必须为正整数
         if not type(interval) is int or interval <= 0:

@@ -13,7 +13,8 @@ def Test(tested_class: unittest.TestCase) -> None:
         使用时只需要在指定类前一行的开头添加 "@Test" 即可，类似于 junit4 框架的使用
         ! 注：请不要对该函数尝试除了 @Test 以外的用法！ !
     
-    params: tested_class: 需要测试的类
+    Args:
+        tested_class: 需要测试的类
     '''
     # 类型检查
     if (not tested_class.__base__ is unittest.TestCase):
