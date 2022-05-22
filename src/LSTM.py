@@ -51,7 +51,7 @@ class LSTM_Model:
         self._model = None
         self._loss = None
         self._hasTrained = False
-    
+
     def load(self, loc: str) -> None:
         ''' 从指定路径读入并加载模型
         
@@ -68,9 +68,9 @@ class LSTM_Model:
                 # 设置模型已训练
                 self._hasTrained = True
         except Exception as e:
-            log.info('加载模型失败，具体信息为：\n')
+            log.info('加载模型失败，具体信息为：')
             log.info(e)
-    
+
     def initialize(self, input_shape: tuple, output_shape: int, dropout_rate: float = 0.2) -> None:
         ''' 用于初始化一个将输出分量映射到(0,1)上的 LSTM 神经网络模型
         
@@ -118,7 +118,7 @@ class LSTM_Model:
         # 训练模型
         self._model.fit(x, y, batch_size, epochs, shuffle=False, validation_split=0.1)
         # 输出模型结果
-        print('模型训练完毕')
+        log.info('模型训练完毕')
         self._model.summary()
         self._hasTrained = True
         

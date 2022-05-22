@@ -52,8 +52,8 @@ class DataProcessor:
         try:
             self.__start_date = pd.Timestamp(start_date)
             self.__end_date = pd.Timestamp(end_date)
-        except ValueError as error:
-            print('请输入正确的日期！', error, sep='\n')
+        except ValueError:
+            raise ValueError('请输入正确格式与内容的日期！\n')
         # 初始化
         self.__stock_code = stock_code
         self.__base = utils(self.__stock_code, self.__start_date, self.__end_date)

@@ -192,7 +192,7 @@ class CPD:
                               UserWarning, stacklevel=1)
                 # 进行新的尝试，当且仅当还有剩余算法可以尝试
                 if algorithm != methods[-1]:
-                    print('现在尝试切换优化算法来进行求解')
+                    log.info('现在尝试切换优化算法来进行求解')
                     continue
             break
         # 如果三个算法均导出了失败的优化，那么根据上面的循环，变量optimization会保存最后一次的结果
@@ -258,16 +258,16 @@ class CPD:
         try:
             Matern_likelihood_info = self._getMaximumLikelihood(Matern_likelihood, Matern_init_value, Matern_bounds)
         except BaseException as e:
-            print('Matern kernel参数的似然函数计算错误，具体形式为：')
-            print(e)
+            log.info('Matern kernel参数的似然函数计算错误，具体形式为：')
+            log.info(e)
             raise RuntimeError("优化参数似然函数失败！")
         Matern_likelihood_value = Matern_likelihood_info['func_value']
         # 求解 CP kernel 参数的极大似然值
         try:
             CP_likelihood_info = self._getMaximumLikelihood(CP_likelihood, CP_init_value, CP_bounds)
         except BaseException as e:
-            print('Change Point kernel参数的似然函数计算错误，具体形式为：')
-            print(e)
+            log.info('Change Point kernel参数的似然函数计算错误，具体形式为：')
+            log.info(e)
             raise RuntimeError("优化参数似然函数失败！")
         CP_likelihood_value = CP_likelihood_info['func_value']
         CP_location = CP_likelihood_info['param_value'][-2]
