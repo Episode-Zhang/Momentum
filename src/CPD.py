@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from  .utils import utils
 from scipy.optimize import minimize
+from mindgo_api import *
 
 
 class CPD:

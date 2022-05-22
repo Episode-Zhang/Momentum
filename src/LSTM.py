@@ -6,6 +6,7 @@
 import numpy as np
 import shelve
 import tensorflow.compat.v1 as tf
+from mindgo_api import *
 
 
 class LSTM_Model:
