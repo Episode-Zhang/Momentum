@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from src.CPD import CPD
 from src.utils import utils
 from packages.Test import Test
-from modules.mindgo_api import *
+from mindgo_api import *
 
 
 @Test

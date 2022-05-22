@@ -7,7 +7,7 @@
 import warnings
 import numpy as np
 import pandas as pd
-from  utils import utils
+from  .utils import utils
 from scipy.optimize import minimize
 
 

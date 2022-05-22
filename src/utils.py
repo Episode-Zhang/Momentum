@@ -6,7 +6,7 @@
 import warnings
 import pandas as pd
 from datetime import timedelta
-from modules.mindgo_api import *
+from mindgo_api import *
 
 
 class utils:

@@ -4,8 +4,8 @@
 ##
 
 import pandas as pd
-from src.utils import utils
-from src.CPD import CPD
+from .utils import utils
+from .CPD import CPD
 
 
 class DataProcessor:
@@ -84,5 +84,5 @@ class DataProcessor:
         volatilities = self.__base.getVolRange(60, 0.94)
         oneday_lagged_returns = self.__base.getOneDayLaggedReturns()
         # 归并
-        target_data = self._mergeData(self.__base.getVolRange(60, 0.94), self.__base.getOneDayLaggedReturns())
+        target_data = self._mergeData(volatilities, oneday_lagged_returns)
         return target_data

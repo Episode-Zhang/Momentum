@@ -4,7 +4,8 @@
 ##
 
 import numpy as np
-import tensorflow as tf
+import shelve
+import tensorflow.compat.v1 as tf
 
 
 class LSTM_Model:
@@ -15,6 +16,10 @@ class LSTM_Model:
           _model: LSTM_Model类的对象保存的具体模型
           _loss: 在训练对象持有的模型时所指定的损失函数
     '''
+    ##
+    # private
+    # 以下方法均为类内私有方法，使用该类的用户不应该在类以外的任何地方调用这些方法
+    ##
     def __SharpeLoss(self, y_true: np.ndarray, y_pred: tf.Tensor) -> tf.Tensor:
         ''' 模型默认的损失函数，定义为某一资产在一个时间窗口上的夏普比率
         
@@ -24,8 +29,6 @@ class LSTM_Model:
                 
         return: 由 y_true 和 y_pred 计算得到的损失函数值
         '''
-        from tensorflow import reduce_mean
-        from tensorflow.math import reduce_std
         from numpy import sqrt
         # 初始化变量
         size = len(y_true)
@@ -36,15 +39,37 @@ class LSTM_Model:
             item = y_pred[i][0] * (target_sigma / y_true[i][0]) * y_true[i][1]
             contributions.append(item)
         # 计算贡献率的夏普率的负数
-        sharpe_ratio = sqrt(252) * reduce_mean(contributions) / reduce_std(contributions)
+        sharpe_ratio = sqrt(252) * tf.reduce_mean(contributions) / tf.math.reduce_std(contributions)
         return -sharpe_ratio
-    
+    ##
+    # public
+    # 以下方法为公有方法，使用该类的用户仅可以在类外调用该类的公有方法
+    ##
     def __init__(self):
         ''' 类的构造方法不接收任何参数，即表明类的初始化需要显式调用其它方法来完成
         '''
         self._model = None
         self._loss = None
         self._hasTrained = False
+    
+    def load(self, loc: str) -> None:
+        ''' 从指定路径读入并加载模型
+        
+        params: loc: 加载模型的路径
+        '''
+        try:
+            with shelve.open(loc) as model_db:
+                # 数据读取
+                info = model_db['basic_view']
+                weights = model_db['weights']
+                # 加载模型的结构和参数
+                self._model = tf.keras.models.model_from_json(info)
+                self._model.set_weights(weights)
+                # 设置模型已训练
+                self._hasTrained = True
+        except Exception as e:
+            log.info('加载模型失败，具体信息为：\n')
+            log.info(e)
     
     def initialize(self, input_shape: tuple, output_shape: int, dropout_rate: float = 0.2) -> None:
         ''' 用于初始化一个将输出分量映射到(0,1)上的 LSTM 神经网络模型
@@ -53,16 +78,13 @@ class LSTM_Model:
                 output_shape: 输出数据的维度
                 dropout_rate: 设置Dropout层中对每次训练一个batch后模型参数随机遗忘的比例
         '''
-        # 导库
-        from tensorflow.keras import Input, Sequential
-        from tensorflow.keras.layers import LSTM, Dense, Dropout
         # 建模
-        model = Sequential()
+        model = tf.keras.Sequential()
         # 添加隐层
-        model.add(Input(shape=input_shape))
-        model.add(LSTM(output_shape))
-        model.add(Dense(1, activation='sigmoid'))
-        model.add(Dropout(rate=dropout_rate))
+        model.add(tf.keras.Input(shape=input_shape))
+        model.add(tf.keras.layers.LSTM(output_shape))
+        model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+        model.add(tf.keras.layers.Dropout(rate=dropout_rate))
         # 将模型作为类的私有成员
         self._model = model
     
@@ -119,12 +141,8 @@ class LSTM_Model:
         '''
         if not self._hasTrained:
             raise RuntimeError('请先调用"fit"方法来训练模型！')
-        self._model.save(loc)
-
-    def load(self, loc: str) -> None:
-        ''' 从指定路径读入并加载模型
-        
-        params: loc: 加载模型的路径
-        '''
-        from tf.keras.models import load_model
-        self._model = load_model(loc)
+        # 保存模型
+        with shelve.open(loc) as model_db:
+            # 模型的结构中需要去除 ragged 关键字，因为 tensorflow 1.x 不支持
+            model_db['basic_view'] = self._model.to_json().replace('"ragged": false, ', '')
+            model_db['weights'] = self._model.get_weights()
