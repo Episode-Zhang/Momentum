@@ -4,7 +4,7 @@
 ##
 
 import pandas as pd
-from .utils import utils
+from .Utils import utils
 from .CPD import CPD
 
 

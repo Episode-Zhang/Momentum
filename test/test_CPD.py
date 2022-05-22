@@ -6,7 +6,7 @@
 import unittest
 import matplotlib.pyplot as plt
 from src.CPD import CPD
-from src.utils import utils
+from src.Utils import utils
 from packages.Test import Test
 from mindgo_api import *
 
